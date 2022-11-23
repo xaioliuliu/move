@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>移动</title>
+</head>
+<style>
+    *{
+        margin: 0;
+        padding: 0;
+    }
+    body{
+        display: flex;
+        width: 100%;
+        height: 100vh;
+        justify-content: center;
+        align-items: center;
+        background-color: black;
+    }
+    canvas{
+        position: absolute;
+        cursor: crosshair;
+    }
+</style>
+<body>
+    <canvas id="canvas"></canvas>
+</body>
+<script>
+    var canvas=document.getElementById('canvas');
+    canvas.width=window.innerWidth;//设置画布为整个页面
+    canvas.height=window.innerHeight;
+    var ctx=canvas.getContext('2d');
+    var mouse={//建立对象记录指针的位置
+        x:0,
+        y:0
+    }
+    var particleArray=[];//建立粒子数组，创建监听对象
+    canvas.addEventListener('mousemove',function(evt){
+        mouse.x=evt.clientX,//根据鼠标位置改变mouse值
+        mouse.y=evt.clientY
+    })
+    var count=100;//定义30个粒子
+    class Particle{
+        constructor(radius,speed,size){//创建粒子对象，输入半径，角速度，尺寸
+            this.r=radius,
+            this.x=0,//默认坐标0，0
+            this.y=0,
+            this.d=Math.random()*360,//设置初始角度为随机
+            this.s=speed,//定义速度以及所有随机的颜色
+            this.c="hsl("+(Math.random()*360|0)+",80%,50%)"
+            this.size=size
+        }
+        update(){
+            this.d+=this.s;//利用角速度值改变角度
+            //利用圆点坐标，生成对应角度，半径的点坐标
+            this.x=mouse.x+this.r*Math.cos((this.d%360)*Math.PI/180)
+            this.y=mouse.y+this.r*Math.sin((this.d%360)*Math.PI/180)
+        }
+        draw(){//绘制粒子
+            //利用坐标，颜色，尺寸绘制粒子
+            ctx.beginPath();
+            ctx.fillStyle=this.c;
+            ctx.globalAlpha=1;//透明度1
+            ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+            ctx.fill();
+        }
+    }
+    function init(){//初始化生成粒子
+        for(var i=0;i<count;i++){//按照粒子数量生成粒子
+            particleArray.push(new Particle(
+                i*1+50,//半径为按照生成的顺序由内向外，50开始间隔5
+                Math.random()+1,//速度1~2
+                Math.random()*2+1//粒子尺寸为1~3
+            ))
+        }
+    }
+    init();
+    function animate(){
+        ctx.clearRect(0,0,canvas.width,canvas.height)
+        ctx.globalAlpha=0.05;//利用透明度为0.1的黑色填充，表现出拖影效果
+        ctx.fillStyle="black";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        for(var i=0;i<count;i++){
+            particleArray[i].update();
+            particleArray[i].draw();
+
+        }
+        requestAnimationFrame(animate)
+    }
+    animate()
+</script>
+</html>
